@@ -8,7 +8,7 @@ GAME RULES:
 */
 
 // variables
-var scores, roundScore, activePlayer, gamePlaying;
+var scores, roundScore, activePlayer, gamePlaying, lastDice;
 
 init();
 
@@ -40,28 +40,46 @@ document.querySelector('.btn-roll').addEventListener('click', function(){
         diceDOM.src = 'dice-' + dice + '.png';
 
         // 3. update the round score IF the rolled number is NOT a 1
-        if(dice !== 1){
+        if(dice === 6 && lastDice === 6){
+            // player loses score
+            scores[activePlayer] = 0;
+            document.querySelector('#score-' + activePlayer).textContent = 0;
+            nextPlayer();
+        } else if(dice !== 1){
             // add score
             roundScore += dice;
             document.querySelector('#current-' + activePlayer).textContent = roundScore;
         } else {
             nextPlayer();
         }
+
+        lastDice = dice;
     }
 
 });
 
 document.querySelector('.btn-hold').addEventListener('click', function(){
 
-    if(gamePlaying){
+    if(gamePlaying) {
         // add current score to global score
         scores[activePlayer] += roundScore;
 
         // update the UI
         document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
 
+        var input = document.querySelector('.final-score').value;
+        var winningScore;
+
+        // undefined, 0, null, or "" are COERCED to FALSE
+        // anything else is COERCED to TRUE
+        if(input) {
+            winningScore = input;
+        } else {
+            winningScore = 100;
+        }
+
         // check if player won the game
-        if(scores[activePlayer] >= 20) {
+        if(scores[activePlayer] >= winningScore) {
             document.querySelector('#name-' + activePlayer).textContent = 'Winner!';
             document.querySelector('.dice').style.display = 'none';
             document.querySelector('.player-' + activePlayer + '-panel').classList.add('winner');
@@ -70,7 +88,7 @@ document.querySelector('.btn-hold').addEventListener('click', function(){
         } else {
             // next player
             nextPlayer();
-        }    
+        }
     }
 
 });
@@ -96,4 +114,5 @@ function init(){
     document.querySelector('.player-0-panel').classList.remove('active');
     document.querySelector('.player-1-panel').classList.remove('active');
     document.querySelector('.player-0-panel').classList.add('active');
+    document.querySelector('.final-score').value = '';
 }
